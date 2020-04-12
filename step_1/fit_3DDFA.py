@@ -12,7 +12,7 @@ adapated from 3DDFA of Xiangyu Zhu
 """
 import os
 import sys
-sys.path.append('../useful_code/3DDFA/')
+sys.path.append('useful_code/3DDFA/')
 
 import torch
 import torchvision.transforms as transforms
@@ -33,11 +33,15 @@ import torch.backends.cudnn as cudnn
 
 STD_SIZE = 120
 
-baseFolder = '../useful_code/3DDFA/'
+baseFolder = 'useful_code/3DDFA/'
+
 class fit_3DDFA():
     def __init__(self, mode='gpu'):
         # load model
-        checkpoint_fp = os.path.join(baseFolder, 'models/phase1_wpdc_vdc_v2.pth.tar')
+        checkpoint_fp = os.path.join(baseFolder, 'models/phase1_wpdc_vdc.pth.tar')
+
+        print (checkpoint_fp)
+
         checkpoint = torch.load(checkpoint_fp, map_location=lambda storage, loc: storage)['state_dict']
         self.model = getattr(mobilenet_v1, 'mobilenet_1')(num_classes=62)  # 62 = 12(pose) + 40(shape) +10(expression)
 

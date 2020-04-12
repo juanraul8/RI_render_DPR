@@ -3,11 +3,11 @@ import cv2
 import os
 
 faceList = []
-with open('../data.list') as f:
+with open('data.list') as f:
     for line in f:
         faceList.append(line.strip())
-imgPath = '../data/'
-savePath = '../result'
+imgPath = 'data/'
+savePath = 'result'
 if not os.path.exists(savePath):
     os.makedirs(savePath)
 
