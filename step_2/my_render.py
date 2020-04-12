@@ -7,10 +7,13 @@ import os
 import sys
 sys.path.append('../utils/cython')
 sys.path.append('../utils')
+
 import numpy as np
+from utils.cython.mesh_core_cython import *
 import mesh_core_cython
 import cv2
 from load_texture import *
+#from utils.load_texture import *
 import time
 
 

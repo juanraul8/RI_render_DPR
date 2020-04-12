@@ -8,7 +8,7 @@ modelFolder = '../data/3DMM/'
 triangle_info_path = os.path.join(modelFolder, 'model_info.mat')
 objPath = os.path.join(modelFolder, 'BFM_UV.mat')
 # change this to absolute path
-mtl_path = '/cfarhomes/hzhou/vulcan_data/portraitRelighting/publish/code_prepare/data/3DMM/3DMM_normal.obj.mtl'
+mtl_path = '../data/3DMM/3DMM_normal.obj.mtl'
 
 getObj = getObj_3DDFA(triangle_info_path, objPath, mtl_path)
 
