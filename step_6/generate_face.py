@@ -98,7 +98,16 @@ class estimateSH_from_faces():
             skinMask: M x N mask, 1 means skin 0 means non-skin
             normalImg: M x N x 3 matrix: x, y z coordinate of normal
         '''
+
+
+        #print (faceImg.shape)
+        #print (skinMask.shape)
+        #print (skinMask)
+
         skinImg = faceImg[skinMask]
+
+        #print (skinImg.shape)
+
         # estimate albedo using the mean of albedo
         albedo = np.sum(skinImg)/np.sum(skinMask)
         #print 'albedo is %f' % albedo

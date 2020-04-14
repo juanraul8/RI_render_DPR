@@ -121,13 +121,15 @@ def process_mask(mask_project, mask_detect):
         get the mask of skin region, it is defined as the intersection of
         projected mask and detected mask
     '''
+
+    #print ("debugging Process Mask")
+
     mask_project = mask_project[:,:,0]/255.0*13.0
     mask_project = np.round(mask_project)
     mask_project = np.abs(mask_project -13.0) < 1e-6
 
     mask_detect = cv2.resize(mask_detect, (mask_project.shape[0], mask_project.shape[1]))
-    mask_detect = np.argmax(mask_detect, axis=2)
-    mask_detect = mask_detect == 1 # 1 means skin
+    mask_detect = mask_detect[:, :, 0] > 0
     
     mask = np.logical_and(mask_project, mask_detect)
     # remove some boundary pixels since they are not accurate
@@ -185,7 +187,7 @@ def script_relighting(numImgs):
         if not os.path.isfile(os.path.join(subFolder, 'full_normal_faceRegion_faceBoundary_extend.npy')):
             print('no normal {}'.format(imgName))
             continue
-        if not os.path.isfile(os.path.join(labelPath, imgName + '_detected.mat')):
+        if not os.path.isfile(os.path.join(labelPath, imgName + '_detected.npy')):
             print('no label {}'.format(imgName))
             continue
         normal = np.load(os.path.join(subFolder, 'full_normal_faceRegion_faceBoundary_extend.npy'))
@@ -197,10 +199,18 @@ def script_relighting(numImgs):
         # and detected skin mask by Sifei Liu
 
         # load projected skin mask
+
+        #print ("Debugging Skin Mask")
         mask_project = cv2.imread(os.path.join(subFolder, 'label.png'))
         # load detected skin mask
-        tmpMat = io.loadmat(os.path.join(labelPath, imgName + '_detected.mat'))
-        mask = process_mask(mask_project, tmpMat['res_label'])
+        tmpMat = np.load(os.path.join(labelPath, imgName + '_detected.npy'))
+
+        mask_test = cv2.resize(tmpMat, (mask_project.shape[0], mask_project.shape[1]))
+        mask_test = (mask_test * 255.0).astype(np.uint8)
+
+        cv2.imwrite(os.path.join(savePath, 'skin_mask_seg.png'), mask_test)
+
+        mask = process_mask(mask_project, tmpMat)
 
         #--------------------------------------------------------
         # compute SH
@@ -212,6 +222,17 @@ def script_relighting(numImgs):
         L_img = Lab[:,:,0].copy()
         getSH = estimateSH_from_faces(method = 'SDP', maxEqus = 10000, verbose=True)  # using SDP since it is fast
         sh, skinImg = getSH.get_SH(Lab[:,:,0]/255.0, mask, normal)
+
+        #print ("skinImg Test")
+
+        mask = mask [..., np.newaxis]
+        skin_img = img * mask
+
+        mask = (mask * 255.0).astype(np.uint8)
+
+        cv2.imwrite(os.path.join(savePath, 'skin_mask.png'), mask)
+        cv2.imwrite(os.path.join(savePath, 'skin_test.png'), skin_img)
+
         # save computed sh
         np.savetxt(os.path.join(savePath, 'ori_sh.txt'), sh)
 
@@ -233,6 +254,16 @@ def script_relighting(numImgs):
         cv2.imwrite(os.path.join(savePath, 'ori_shading.png'), visShading.astype(np.uint8))
         # save the original shading for futher use
         np.save(os.path.join(savePath, 'ori_shading.npy'), newShading)
+
+        # rendering half-sphere original lighting
+        sh = np.squeeze(sh)
+        shading = get_shading(normal_sphere, sh)
+        ind = shading > 1
+        shading[ind] = 1
+        shading = (shading * 255.0).astype(np.uint8)
+        shading = np.reshape(shading, (256, 256))
+        shading = shading * valid
+        cv2.imwrite(os.path.join(savePath, 'sphere_' + imgName + '_ori.png'), shading)
 
         # randomly select lighting 
         log_fid = open(os.path.join(os.path.join(savePath, imgName + '_log.txt')), 'w')
@@ -262,6 +293,8 @@ def script_relighting(numImgs):
             cv2.imwrite(os.path.join(savePath, \
                     'sphere_' + imgName + '_{:02d}.png'.format(i)), shading)
         log_fid.close()
+
+        break
 if __name__ == '__main__':
     numImgs = int(sys.argv[1])
     script_relighting(numImgs)
