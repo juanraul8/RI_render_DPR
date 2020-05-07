@@ -294,40 +294,6 @@ if __name__ == '__main__':
             shading = shading * valid
             cv2.imwrite(os.path.join(savePath, 'sphere_' + name + '_ori.png'), shading)
 
-            # randomly select lighting
-            log_fid = open(os.path.join(os.path.join(savePath, name + '_log.txt')), 'w')
-
-            for i in range(numImgs):
-                itemName = np.random.choice(lightList)
-                lightName = (os.path.join(lightPath, itemName + '.txt'.format(i)))
-
-                sh = np.loadtxt(lightName)
-                sh, factor, sh_angle = process_SH_simple(sh)
-                np.savetxt(os.path.join(os.path.join(savePath, name + '_light_{:02d}.txt'.format(i))), sh)
-
-                print('name {} scale {:0.6f} angle {:0.6f}'.format(itemName, factor, sh_angle), file=log_fid)
-
-                Limg, shading, ratio = generate_face(L_img, newShading, normal, sh)
-
-                Lab[:, :, 0] = Limg
-                img = cv2.cvtColor(Lab, cv2.COLOR_Lab2BGR)
-
-                cv2.imwrite(os.path.join(savePath, name + '_{:02d}.png'.format(i)), img)
-                cv2.imwrite(os.path.join(savePath, 'shading_' + name + '_{:02d}.png'.format(i)),
-                            (((shading - np.min(shading)) / (np.max(shading) - np.min(shading))) * 255.0).astype(
-                                np.uint8))
-
-                # rendering half-sphere
-                sh = np.squeeze(sh)
-                shading = get_shading(normal_sphere, sh)
-                ind = shading > 1
-                shading[ind] = 1
-                shading = (shading * 255.0).astype(np.uint8)
-                shading = np.reshape(shading, (256, 256))
-                shading = shading * valid
-                cv2.imwrite(os.path.join(savePath, \
-                                         'sphere_' + name + '_{:02d}.png'.format(i)), shading)
-
             print("Test Done")
             input()
 

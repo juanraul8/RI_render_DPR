@@ -126,4 +126,4 @@ class fit_3DDFA():
         cv2.imwrite(wfp, depths_img)
         #print('Dump to {}'.format(wfp))
 
-        draw_landmarks(img_ori, pts_res, wfp=os.path.join(saveFolder, imgName)+'_3DDFA.png', show_flg=False)
+        #draw_landmarks(img_ori, pts_res, wfp=os.path.join(saveFolder, imgName)+'_3DDFA.png', show_flg=False)
